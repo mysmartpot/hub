@@ -1,3 +1,6 @@
+# This module defines a function for scanning for Smart Pot devices that are
+# in reach of the Smart Pot Hub. The scan result is saved until the next scan.
+
 import asyncio
 import bleak
 import bleak.backends.device

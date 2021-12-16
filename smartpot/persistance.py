@@ -1,3 +1,12 @@
+# This module maintains a SQLite database for persisting data.
+#
+# The database is managed by a worker thread. As long as the worker thread
+# is running scripts including this module will not terminate.
+# To savely terminate the worker thread run `persistance.worker.shutdown()`.
+#
+# All operations in this module synchronize with the worker thread, i.e., they
+# enqueue a task and block until it has been processed by the worker thread.
+
 import mvar
 import queue
 import sqlite3
@@ -23,6 +32,7 @@ class WorkerThread(threading.Thread):
             raise result
         return result
 
+    # Savely terminates the worker thread.
     def shutdown(self):
         def task(_):
             print(f'Shutting down {self.name}...')
@@ -30,6 +40,7 @@ class WorkerThread(threading.Thread):
         print(f'Waiting to shut down {self.name}...')
         self.await_task(task)
 
+    # Main loop of the thread.
     def run(self):
         # Connect to database.
         print(f'Started {self.name}')
@@ -48,6 +59,7 @@ class WorkerThread(threading.Thread):
 
 worker = WorkerThread()
 worker.start()
+
 
 # Calls the given callback with a new cursor and saves the changes if the
 # callback completes without throwing an exception. Otherwise, the transaction

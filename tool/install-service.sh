@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# This script creates a systemd service for the Smart Pot Hub.
+
+# Name and path to the file that contains the service configuration.
 smartpot_service="smart-pot-hub.service"
 service_file="/lib/systemd/system/$smartpot_service"
 

@@ -1,3 +1,10 @@
+# This module contains functions to interact with the persistant `known_pots`
+# table.
+#
+# A known pot is a Smart Pot that has been connected to the Hub in the past.
+# There is a background thread that ensures that known pots connect
+# automatically as soon as they become available.
+
 import smartpot.persistance as persistance
 
 
@@ -15,7 +22,7 @@ def lookup_known_pot_id(addr):
     ''', (addr,))[0]
 
 
-# Tests whether the pot with the given adress is known.
+# Tests whether the pot with the given address is known.
 def is_pot_known_addr(addr):
     return persistance.fetchone('''
         SELECT EXISTS (SELECT id FROM known_pots WHERE addr = ?)

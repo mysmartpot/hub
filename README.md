@@ -59,7 +59,7 @@ Connect to the Pi via SSH as described above and open the configuration tool by 
 sudo raspi-config
 ```
 
-In the configuration tool, make the following changes.
+In the configuration tool, makes the following changes.
 
  1. In `System Options > Password` assign a new password to the `pi` user.
     Changing the password is recommended for security reasons.
@@ -82,7 +82,7 @@ ssh pi@smart-pot-hub
 ### Firmware Installation
 
  1. Connect to the Pi via SSH as described above, clone this repository via Git or download the code as a zip file and extract it in the home directory of the `pi` user.
-    Now, the following files and directories should exist.
+    Now the following files and directories should exist.
 
     ```
     /home/pi/smart-pot-hub
@@ -93,14 +93,14 @@ ssh pi@smart-pot-hub
 
     During development the `./tool/upload.sh` script can be used to upload the code from your local machine to the Pi.
 
- 2. Change into the root directory of the repository and run the installation script to download depdencies.
+ 2. Change into the root directory of the repository and run the installation script to download dependencies.
 
     ```sh
     cd /home/pi/smart-pot-hub
     ./tool/install.sh
     ```
 
- 3. Confirm that the Smart Pot Hub service was installed and started successfully by typing the follwoing command.
+ 3. Confirm that the Smart Pot Hub service was installed and started successfully by typing the following command.
 
     ```sh
     sudo systemctl status smart-pot-hub.service

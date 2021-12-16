@@ -1,3 +1,10 @@
+# This module defines the Bluetooth characteristics that are used to
+# communicate with the Smart Pot devices.
+#
+# There are two characteristics: one to read measurement data and one to
+# control the pump relay. To avoid polling the measurement characteristics
+# notifications can be used (see `subscribe_measurements`).
+
 # The UUID of the smart pot service.
 SERVICE_UUID = 'b62a0000-069a-4fc6-9d5b-1daadc0cda33'
 

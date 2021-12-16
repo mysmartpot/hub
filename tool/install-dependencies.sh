@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# This script installs the packages needed to run the Smart Pot Hub.
+
 # Update all installed packages.
 sudo apt-get update
 sudo apt-get upgrade -y

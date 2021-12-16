@@ -1,3 +1,9 @@
+# This module defines functions to interact with the persistant `measurements`
+# table.
+#
+# The `measurements` table records the raw data recorded by the  soil moisture
+# and water level sensors. Measurements are keept track of for at most a year.
+
 import smartpot.persistance as persistance
 
 # The maximum age of a measurement in days before it should be removed from the

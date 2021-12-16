@@ -1,3 +1,6 @@
+# This module contains the REST API that is used by the Android app to interact
+# with the Smart Pot Hub.
+
 from flask import Flask, abort, request
 from flask_json import FlaskJSON, as_json
 

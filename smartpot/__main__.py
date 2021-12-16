@@ -1,3 +1,8 @@
+# This is the main module of the Smart Pot Hub.
+#
+# This module runs multiple threads to manage the connected Smart Pot
+# divices and starts the REST API.
+
 import asyncio
 import smartpot.available_pots as available_pots
 import smartpot.characteristics as characteristics
@@ -10,6 +15,11 @@ import threading
 import traceback
 
 
+# A thread that manages the connection to the Smart Pots.
+#
+# This thread periodically scans for available Smart Pots. If a known Smart Pot
+# is available, a connection is established and we start to listen for
+# measurements and run pending pump tasks.
 class ConnectionThread (threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
@@ -20,6 +30,7 @@ class ConnectionThread (threading.Thread):
         asyncio.set_event_loop(self.event_loop)
         self.event_loop.run_until_complete(self.loop())
 
+    # Main loop of the thread.
     async def loop(self):
         while True:
             try:
@@ -36,12 +47,12 @@ class ConnectionThread (threading.Thread):
     # Connects to available known pots.
     async def run_connect(self):
         for device in available_pots.get_available_pots():
+            # Try to connect if the pot is known.
             if known_pots.is_pot_known_addr(device.address):
                 pot_id = known_pots.lookup_known_pot_id(device.address)
                 client = await connected_pots.connect(device)
                 if client is None:
                     continue
-
 
                 # Enable notifications for the soil moisture and water level
                 # characteristics.
@@ -60,12 +71,15 @@ connectionThread = ConnectionThread()
 connectionThread.start()
 
 
+# A thread that blocks until a new pump task is scheduled and then runs that
+# task in the `connectThread`s event loop.
 class PumpThread(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
         self.deamon = True
 
     def run(self):
+        # Executes the given pump task.
         async def run_task(task):
             addr = known_pots.lookup_known_pot_addr(task.pot_id)
             if connected_pots.is_connected(addr):
@@ -73,6 +87,7 @@ class PumpThread(threading.Thread):
                 await characteristics.write_pump_amount(client, task.amount)
                 pump_tasks.set_task_execution_date(task)
 
+        # Run pump tasks in the event loop of the `connectionThread`.
         while True:
             task = pump_tasks.dequeue_pump_task()
             coro = run_task(task)
@@ -83,6 +98,7 @@ pumpThread = PumpThread()
 pumpThread.start()
 
 
+# Removes old database entries once per day.
 def run_periodic_cleanup():
     measurements.remove_old_measurements()
     pump_tasks.remove_old_history_entries()
@@ -93,4 +109,5 @@ def run_periodic_cleanup():
 
 run_periodic_cleanup()
 
+# Run the REST API in the main thread.
 rest_api.run(host="0.0.0.0")

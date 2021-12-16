@@ -1,3 +1,14 @@
+# This module maintains a queue and persistant history of tasks to pump water
+# into a Smart Pot.
+#
+# The queue contains `PumpTask`s that have not been completed yet.
+# The REST API enqueues new task. There is a background thread that
+# dequeues and executes the tasks.
+#
+# The history is persistent and contains both completed and pending tasks.
+# When a known pot connects, all pending pump tasks are enqueued. History
+# entries are retained for at most a year.
+
 import queue
 import smartpot.persistance as persistance
 
@@ -13,6 +24,17 @@ pump_tasks = queue.Queue()
 
 
 # A task for pumping water into a smart pot.
+#
+# This class is used both to represent a history entry that was fetched from
+# the database and as a queue enetry.
+#
+# Usually you should not create an instance of this class directly.
+# Use the functions defined in this module to fetch instances from the
+# database or create new entries.
+#
+# A pending task has no `executed_at` timestamp.
+# The `created_at` timestamp is automatically filled in by `add_history_entry`
+# when the history entry for the task is created.
 class PumpTask:
     def __init__(self, pot_id, amount, created_at=None, executed_at=None):
         self.pot_id = pot_id
@@ -23,6 +45,8 @@ class PumpTask:
 
 # Enqueues a new task for pumping the given amount of water into the smart pot
 # with the given ID.
+#
+# A history entry for the task is automatically added to the database.
 def enqueue_new_pump_task(pot_id, amount):
     task = PumpTask(pot_id, amount)
     add_history_entry(task)
@@ -30,12 +54,17 @@ def enqueue_new_pump_task(pot_id, amount):
 
 
 # Enqueues a the a pump task that already has a history entry.
+#
+# This function is used for exmaple to put a pending task back into the queue
+# after it has been restored from the database using `get_pending_tasks_of`.
 def enqueue_pump_task(task):
     pump_tasks.put(task)
 
 
 # Dequeues a task for pumping water into a smart pot that has not been executed
 # yet.
+#
+# This method blocks until a pending task is available.
 def dequeue_pump_task():
     while True:
         task = pump_tasks.get()
@@ -57,7 +86,8 @@ def get_last_task_of(pot_id):
     return None if result is None else PumpTask(pot_id, *result)
 
 
-# Gets the last pump task of the pot with the given id.
+# Gets all pump task of the pot with the given id that have not been executed
+# yet.
 def get_pending_tasks_of(pot_id):
     tasks = persistance.fetchall('''
         SELECT amount, created_at FROM pump_history
@@ -68,6 +98,8 @@ def get_pending_tasks_of(pot_id):
 
 
 # Adds a history entry for the given task.
+#
+# The `created_at` field of the pump task will be set to the current timestamp.
 def add_history_entry(task):
     rowid = persistance.execute_insert('''
         INSERT INTO pump_history ( pot_id, amount )
@@ -100,6 +132,7 @@ def fetch_task_execution_date(task):
 def has_executed_task(task):
     fetch_task_execution_date(task)
     return task.executed_at is not None
+
 
 # Removes all history entries from the database that are older than
 # `HISTORY_ENTRY_MAX_AGE` days.
