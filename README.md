@@ -106,6 +106,15 @@ ssh pi@smart-pot-hub
     sudo systemctl status smart-pot-hub.service
     ```
 
+## License
+
+The Smart Pot Hub is licensed under the MIT license agreement.
+See the [LICENSE][smart-pot/hub/LICENSE] file for details.
+
 [rpi-imager]:
   https://www.raspberrypi.org/software/
   "Install Raspberry Pi OS using Raspberry Pi Imager"
+
+[smart-pot/hub/LICENSE]:
+  https://github.com/mysmartpot/hub/blob/main/LICENSE
+  "The MIT License"
